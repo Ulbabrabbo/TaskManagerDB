@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
-import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,8 +29,8 @@ public class TaskController {
     @Operation(summary = "View list of tasks")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved list"),
-            @ApiResponse(responseCode = "401", description = "You are not authorized to access this resource"),
-            @ApiResponse(responseCode = "404", description = "List not found")
+            @ApiResponse(responseCode = "500", description = "Internal server error"),
+            @ApiResponse(responseCode = "503", description = "Service temporarily unavailable")
     })
     @GetMapping
     public ResponseEntity<List<Task>> getTasks(
@@ -45,8 +44,9 @@ public class TaskController {
     @Operation(summary = "View a single task by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved task"),
-            @ApiResponse(responseCode = "401", description = "You are not authorized to access this resource"),
-            @ApiResponse(responseCode = "404", description = "task not found")
+            @ApiResponse(responseCode = "404", description = "task not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error"),
+            @ApiResponse(responseCode = "503", description = "Service temporarily unavailable")
     })
     @GetMapping("/{id}")
     ResponseEntity<Task> getTaskById(@PathVariable int id){
@@ -57,7 +57,8 @@ public class TaskController {
     @Operation(summary = "create new task")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successfully created task"),
-            @ApiResponse(responseCode = "401", description = "You are not authorized to access this resource")
+            @ApiResponse(responseCode = "500", description = "Internal server error"),
+            @ApiResponse(responseCode = "503", description = "Service temporarily unavailable")
     })
     @PostMapping
     ResponseEntity<Task> postTask(@Valid @RequestBody TaskRequest request){
@@ -75,8 +76,9 @@ public class TaskController {
     @Operation(summary = "update existing task")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated task"),
-            @ApiResponse(responseCode = "401", description = "You are not authorized to access this resource"),
-            @ApiResponse(responseCode = "404", description = "task not found")
+            @ApiResponse(responseCode = "404", description = "task not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error"),
+            @ApiResponse(responseCode = "503", description = "Service temporarily unavailable")
     })
     @PutMapping("/{id}")
     ResponseEntity<Task> putTask(@Valid @RequestBody TaskRequest request, @PathVariable int id){
@@ -91,11 +93,12 @@ public class TaskController {
         return ResponseEntity.ok(updatedTask);
     }
 
-    @Operation(summary = "View a single task by id")
+    @Operation(summary = "Delete a single task by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Successfully deleted task"),
-            @ApiResponse(responseCode = "401", description = "You are not authorized to access this resource"),
-            @ApiResponse(responseCode = "404", description = "task not found")
+            @ApiResponse(responseCode = "404", description = "task not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error"),
+            @ApiResponse(responseCode = "503", description = "Service temporarily unavailable")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTask(@PathVariable int id) {
