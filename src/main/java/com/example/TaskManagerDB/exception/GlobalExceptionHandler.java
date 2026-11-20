@@ -8,14 +8,15 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final Logger logger =
             LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
 
     @ExceptionHandler(TaskNotFoundException.class)
     public ProblemDetail taskNotFoundHandler(TaskNotFoundException e, HttpServletRequest request) {
@@ -44,13 +45,17 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ProblemDetail argumentNotValid(MethodArgumentNotValidException e, HttpServletRequest request) {
+        String errorMessage = e.getBindingResult()
+                .getFieldErrors()
+                .get(0)
+                .getDefaultMessage();
+
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
-                e.getMessage()
+                errorMessage
         );
-        problem.setTitle("Missing or invalid required fields");
+        problem.setTitle("Validation failed");
         problem.setInstance(
                 java.net.URI.create(request.getRequestURI())
         );
@@ -58,7 +63,6 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ProblemDetail internalServerError(Exception e, HttpServletRequest request) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(
                 HttpStatus.INTERNAL_SERVER_ERROR,

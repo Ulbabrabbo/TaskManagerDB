@@ -7,11 +7,11 @@ import lombok.Data;
 @Data
 public class TaskRequest {
 
-    @NotBlank
+    @NotBlank(message = "titolo richiesto!")
     private String title;
 
     private String description;
 
-    @NotNull
+    @NotNull(message = "Status richiesto!")
     private Status status;
 }
