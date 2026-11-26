@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -90,6 +91,32 @@ public class GlobalExceptionHandler {
         );
         problem.setTitle("Validation failed");
         problem.setInstance(URI.create(request.getRequestURI()));
+        problem.setProperty("errors", errors);
+        return problem;
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ProblemDetail handleTypeMismatch(MethodArgumentTypeMismatchException e, HttpServletRequest request) {
+
+        String parameterName = e.getName();
+        String rejectedValue = String.valueOf(e.getValue());
+        String expectedType = e.getRequiredType() != null
+                ? e.getRequiredType().getSimpleName()
+                : "unknown";
+
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                "Il parametro '%s' deve essere di tipo %s."
+                        .formatted(parameterName, expectedType)
+        );
+        problem.setTitle("tipo del parametro non valido");
+        problem.setInstance(URI.create(request.getRequestURI()));
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put(parameterName,
+                "Il valore: '%s' non è di tipo: %s."
+                        .formatted(rejectedValue, expectedType));
+
         problem.setProperty("errors", errors);
         return problem;
     }
