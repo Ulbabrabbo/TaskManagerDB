@@ -27,47 +27,97 @@ FIRST EXECUTION:
 
 The app support Swagger for documentation and testing: http://localhost:8080/swagger-ui/index.html
 
-TEST with Bruno: To test the application using Bruno, follow these steps after starting the application as described above:
 
-    Create a new collection in Bruno (Quick Start Guide).
-    Create the following HTTP requests:
+TESTING with Postman
+To test the application using Postman, follow these steps after starting the application as described above.
 
-    Get all tasks: Returns the list of all available tasks.
+- Setup
+1. Download and install [Postman](https://www.postman.com/downloads/).
+2. Create a new collection (e.g., "Task Manager API").
+3. Set up a collection variable:
+   - baseUrl: "http://localhost:8080"
+4. Create the following HTTP requests inside the collection.
 
-    Type: HTTP
-    Method: GET
-    URL: "http://localhost:8080/api/tasks"
+-- Positive Tests
 
-    Get tasks filtered by status
+1. Get all tasks
+- Method: GET
+- URL: "{{baseUrl}}/api/tasks"
+- Expected status: 200 OK
 
-    Type: HTTP
-    Method: GET
-    URL: "http://localhost:8080/api/tasks?status={STATUS}" (Replace "{STATUS}" with a valid status (TODO, DONE or IN_PROGRESS) Example: "http://localhost:8080/api/tasks?status=TODO"
+2. Get tasks filtered by status**
+- Method: GET
+- URL: "{{baseUrl}}/api/tasks?status=TODO"
+- Expected status: 200 OK
+Valid statuses are "TODO", "IN_PROGRESS" and "DONE".
 
-    Get task by ID
+3. Get task by ID
+- Method: GET
+- URL: "{{baseUrl}}/api/tasks/1"
+- Expected status: 200 OK
+Replace "1" with the ID of the task you want to retrieve.
 
-    Type: HTTP
-    Method: GET
-    URL: "http://localhost:8080/api/tasks/{id}" (Replace "{id}" with the ID of the task you want to retrieve) Example: "http://localhost:8080/api/tasks/1"
+4. Create a new task
+- Method: POST
+- URL: "{{baseUrl}}/api/tasks"
+- Body: raw → JSON
+- Expected status: 201 Created
 
-    Create a new task
+body example:
+{
+    "title": "Complete Spring Boot project",
+    "description": "Implement the Task Manager API",
+    "status": "TODO"
+}
+The title and status are required. The description is optional.
 
-    Type: HTTP
-    Method: POST
-    URL: "http://localhost:8080/api/tasks"
-    Body: JSON Example request body (JSON): { "title": "title_text", "description": "description_text", "status": "TODO" } The request body must contain the fields required by the "Task" (Title and Status) Returns the newly created task with HTTP status "201 CREATED".
+5. Update an existing task
+- Method: PUT
+- URL: "{{baseUrl}}/api/tasks/1"
+- Body: raw → JSON
+- Expected status: 200 OK
+Replace "1" with the ID of the task you want to update.
 
-    Update an existing task
+6. Delete a task
+- Method: DELETE
+- URL: "{{baseUrl}}/api/tasks/1"
+- Expected status: 204 No Content
+Replace "1" with the ID of the task you want to delete.
 
-    Type: HTTP
-    Method: PUT
-    URL: "http://localhost:8080/api/tasks/{id}" (Replace "{id}" with the ID of the task you want to update)
-    Body: JSON Example: "http://localhost:8080/api/tasks/1" Example request body (JSON): { "title": "Complete Spring Boot project", "description": "Task updated successfully", "status": "DONE" }
+---
+---
+---
 
-    Delete a task
+-- Negative Tests
+You can do requests to verify that the API correctly handles possible invalid input and missing resources.
+When an error occurs the app returns a ProblemDetail containing info on the error
 
-    Type: HTTP
-    Method: DELETE
-    URL: "http://localhost:8080/api/tasks/{id}" (Replace "{id}" with the ID of the task you want to delete) Example: "http://localhost:8080/api/tasks/1" Returns HTTP status "204 NO CONTENT" if the operation is successful.
+1. access task that does not exist
+- Expected status: 404 Not Found
+- info: Task not found
 
-Once the requests have been created, you can execute them individually by clicking the "Send" button.
+
+2. Create/update a task with invalid data
+example:
+{
+    "title": "",
+    "description": "Invalid task",
+    "status": "INVALID"
+}
+The request is rejected because the title is blank. The response contains validation error details.
+
+- Expected status: 400 Bad Request
+- info: Validation failed
+- errors: required title.
+
+The request can be also rejected for example if the title exceeds the maximum allowed length of 100 characters or if the description exceeds 200 characters. 
+
+
+3. Update a task with an invalid ID
+- URL: {{baseUrl}}/api/tasks/-1
+
+- Expected status: 400 Bad Request
+- info: Validation failed
+- errors: id must be greater than 0
+
+Task IDs must be positive integers.
