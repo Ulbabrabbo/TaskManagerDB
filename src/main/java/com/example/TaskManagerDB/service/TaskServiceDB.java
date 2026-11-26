@@ -1,8 +1,10 @@
 package com.example.TaskManagerDB.service;
 
+import com.example.TaskManagerDB.DTO.UpdateTaskRequest;
 import com.example.TaskManagerDB.data.Status;
 import com.example.TaskManagerDB.data.Task;
 import com.example.TaskManagerDB.exception.TaskNotFoundException;
+import com.example.TaskManagerDB.mapper.TaskMapper;
 import com.example.TaskManagerDB.repositories.TaskRepository;
 import org.springframework.stereotype.Service;
 
@@ -12,9 +14,11 @@ import java.util.List;
 public class TaskServiceDB implements TaskService {
 
     private final TaskRepository myRepository;
+    private final TaskMapper myMapper;
 
-    TaskServiceDB(TaskRepository repository){
+    TaskServiceDB(TaskRepository repository, TaskMapper mapper){
         this.myRepository = repository;
+        this.myMapper = mapper;
     }
 
     @Override
@@ -35,14 +39,14 @@ public class TaskServiceDB implements TaskService {
     }
 
     @Override
-    public Task updateTask(int id, Task task) {
+    public Task updateTask(int id, UpdateTaskRequest request) {
+        // controllo che ci sia il task con dato id
         Task existingTask = myRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException(id));
 
-        existingTask.setTitle(task.getTitle());
-        existingTask.setDescription(task.getDescription());
-        existingTask.setStatus(task.getStatus());
-
+        // il mapper va a mappare i valori del request fornito nel existingTask (MappingTarget)
+        myMapper.updateEntity(request, existingTask);
+        // restituisce un task per poi creare la response (existingTak ormai è modificato)
         return myRepository.save(existingTask);
     }
 

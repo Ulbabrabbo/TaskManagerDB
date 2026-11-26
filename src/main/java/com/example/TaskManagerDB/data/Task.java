@@ -18,11 +18,11 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotBlank(message = "Title required")
+    @NotBlank(message = "Titolo richiesto")
     private String title;
 
     private String description;
 
-    @NotNull(message = "Status required")
+    @NotNull(message = "Status richiesto")
     private Status status;
 }
